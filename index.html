@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>全景案例</title>
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background-color: #ddd;
+      /* background-repeat: no-repeat; */
+      /* background-size: cover; */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .FJMap {
+      border: 1px solid #000;
+      box-sizing: border-box;
+      /* z-index: 2000; */
+      cursor: default;
+    }
+
+    #canvasposition {
+      width: 1731px;
+      height: 911px;
+      /* background-color: red; */
+      opacity: 0;
+      position: absolute;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='canvasposition'></div>
+  <canvas id='mycanvas' width="1731" height="911" class='FJMap'></canvas>
+  <script type="text/javascript">
+    var arr = [
+      // 福州
+      {
+        x: 1033,
+        y: 434,
+        radius: 8,
+        content: '福州',
+        color: 'red'
+      },
+      // 莆田
+      {
+        x: 979,
+        y: 544,
+        radius: 8,
+        content: '莆田',
+        color: 'red'
+      },
+      // 厦门
+      {
+        x: 814,
+        y: 722,
+        radius: 8,
+        content: '厦门',
+        color: 'red'
+      }
+    ];
+    var radius = arr[0].radius;
+    var mycanvas = document.getElementById('mycanvas')
+    var canvasposition = document.getElementById('canvasposition')
+    var ctx = mycanvas.getContext('2d')
+    var img = new Image();
+    img.src = "./img/fujian.png";
+
+    // 开始画图
+    img.onload = function () {
+      ctx.drawImage(img, 0, 0);
+      draw();
+    }
+    //判断点击,跳转
+    canvasposition.addEventListener('click', function (e) {
+      p = getEventPosition(e);
+      // console.log(p)
+      //判断点击了那个矩形
+      if (p.y >= arr[0].y - radius && p.y <= arr[0].y + radius && p.x >= arr[0].x - radius && p.x <= arr[0].x +
+        radius) {
+        // console.log('福州', p)
+        window.location = '/fuzhou.html';
+      }
+      if (p.y >= arr[1].y - radius && p.y <= arr[1].y + radius && p.x >= arr[1].x - radius && p.x <= arr[1].x +
+        radius) {
+        // console.log('莆田', p)
+        window.location = '/putian.html';
+      }
+      if (p.y >= arr[2].y - radius && p.y <= arr[2].y + radius && p.x >= arr[2].x - radius && p.x <= arr[2].x +
+        radius) {
+        // console.log('厦门', p)
+        window.location = '/xiamen.html';
+      }
+    }, false);
+    canvasposition.addEventListener('mousemove', function (e) {
+      // console.log(e);
+      p = getEventPosition(e);
+      //判断点击了那个矩形
+      if (p.y >= arr[0].y - radius && p.y <= arr[0].y + radius && p.x >= arr[0].x - radius && p.x <= arr[0].x +
+        radius) {
+        this.style.cursor = 'pointer';
+      } else if (p.y >= arr[1].y - radius && p.y <= arr[1].y + radius && p.x >= arr[1].x - radius && p.x <= arr[1]
+        .x +
+        radius) {
+        this.style.cursor = 'pointer';
+      } else if (p.y >= arr[2].y - radius && p.y <= arr[2].y + radius && p.x >= arr[2].x - radius && p.x <= arr[2]
+        .x +
+        radius) {
+        this.style.cursor = 'pointer';
+      } else {
+        this.style.cursor = 'default';
+      }
+    }, false);
+    // //注：使用这个函数，需要给Canvas元素的position设为absolute。
+    //要判断事件对象发生的位置，事件对象e的layerX和layerY属性表示Canvas内部坐标系中的坐标
+    function getEventPosition(ev) {
+      var x, y;
+      if (ev.layerX || ev.layerX == 0) {
+        x = ev.layerX;
+        y = ev.layerY;
+      } else if (ev.offsetX || ev.offsetX == 0) { // Opera
+        x = ev.offsetX;
+        y = ev.offsetY;
+      }
+      return {
+        x: x,
+        y: y
+      };
+    }
+
+    //画图像
+    function draw() {
+      // var who = [];
+      // ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
+      arr.forEach(function (v, i) {
+        ctx.beginPath();
+        ctx.arc(v.x, v.y, v.radius, 0, Math.PI * 2);
+        ctx.fillStyle = v.color;
+        ctx.fill();
+        // ctx.fillStyle = '#000';
+        // ctx.fillText(v.content, v.x - 20, v.y - 20);
+        ctx.stroke();
+      });
+
+    }
+  </script>
+
+
+</body>
+
+</html>
