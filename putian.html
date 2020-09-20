@@ -1,191 +1,200 @@
 <!DOCTYPE html>
-<html>
-
-<head>
-  <meta charset="utf-8">
-  <title>全景案例</title>
-  <style lang="">
-    * {
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    #return {
-      width: 80px;
-      height: 40px;
-      background-color: #000;
-      opacity: 0.5;
-      border: 1px solid #000;
-      border-radius: 20px;
-      position: fixed;
-      left: 80px;
-      top: 30px;
-      z-index: 2000;
-    }
-
-    .returntext {
-      color: #fff;
-      font-size: 18px;
-      opacity: 1;
-      width: 100%;
-      height: 40px;
-      text-align: center;
-      line-height: 40px;
-      cursor: pointer;
-    }
-
-    #mapinfo {
-      width: 100px;
-      height: 80px;
-      background-color: #000;
-      opacity: 0.5;
-      border: 1px solid #000;
-      border-radius: 5px;
-      position: fixed;
-      right: 100px;
-      top: 30px;
-      z-index: 2000;
-    }
-
-    .maptitle {
-      width: 100%;
-      padding: 8px;
-      color: #fff;
-      font-size: 16px;
-      opacity: 1;
-      line-height: 16px;
-    }
-
-    .maptext {
-      width: 100%;
-      padding: 8px;
-      color: #fff;
-      font-size: 14px;
-      opacity: 1;
-      line-height: 14px;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="container">
-    <div id="return">
-      <div class="returntext">返回</div>
-    </div>
-    <div id="mapinfo">
-      <div class="maptitle">地图信息</div>
-      <div class="maptext">地区 : 莆田 </div>
-    </div>
-  </div>
-  <script type="text/javascript" src="./js/three.js"></script>
-  <script type="text/javascript" src="./js/DeviceOrientationControls.js"></script>
-  <script type="text/javascript" src="./js/Tween.js"></script>
-  <script type="text/javascript" src="./js/OrbitControls.js"></script>
-  <script type="text/javascript">
-    class panorama {
-      constructor() {
-        this.SCREEN_WIDTH = window.innerWidth;
-        this.SCREEN_HEIGHT = window.innerHeight;
-        this.scene = new THREE.Scene()
-        this.timestart = new Date();
-        this.initMesh();
-        this.initRenderer();
-        this.initCamera();
-        this.animate();
-        this.start();
-
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>全景案例</title>
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
       }
-      initCamera() {
-        let aspect = this.SCREEN_WIDTH / this.SCREEN_HEIGHT;
-        this.camera = new THREE.PerspectiveCamera(150, aspect, 1, 2000);
-        this.camera.position.set(0, 450, 0);
-        // this.camera.position.set(-0.3, 0, 0);
-        this.camera.target = new THREE.Vector3(0, -1, 0);
-        let controls = this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        controls.minDistance = 1;
-        controls.maxDistance = 2;
-        controls.enablePan = false;
 
+      html,
+      body {
+        height: 100%;
+        width: 100%;
       }
-      initMesh() {
-        let geometry = new THREE.SphereGeometry(500, 60, 40);
-        geometry.scale(-1, 1, 1);
-        geometry.rotateY(-Math.PI / 2)
-        let material = new THREE.MeshBasicMaterial({
-          map: new THREE.TextureLoader().load('./img/putian.jpg')
-        });
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.scene.add(this.mesh);
+
+      body {
+        background-color: #ddd;
+        /* background-repeat: no-repeat; */
+        /* background-size: cover; */
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
-      initRenderer() {
-        let container = document.getElementById('container');
-        let renderer = this.renderer = new THREE.WebGLRenderer({
-          logarithmicDepthBuffer: true
-        });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.sortObjects = false;
-        renderer.autoClear = false;
-        container.appendChild(renderer.domElement);
+
+      .FJMap {
+        border: 1px solid #000;
+        box-sizing: border-box;
+        /* z-index: 2000; */
+        cursor: default;
       }
-      initOrbitControl() {
-        let controls = this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        controls.minDistance = 1;
-        controls.maxDistance = 2;
-        controls.enablePan = false;
+
+      #canvasposition {
+        width: 1731px;
+        height: 911px;
+        /* background-color: red; */
+        opacity: 0;
+        position: absolute;
       }
-      start() {
-        let {
-          camera
-        } = this;
-        new TWEEN.Tween({
-            lat: 0,
-            y: camera.position.y,
-            fov: camera.fov
-          })
-          .to({
-            lat: 90,
-            y: 0,
-            fov: 100
-          }, 2500)
-          .delay(800)
-          .easing(TWEEN.Easing.Cubic.InOut)
-          // .repeat(Infinity)
-          .onUpdate(function () {
-            let phi = THREE.Math.degToRad(this.lat);
-            camera.target.y = -500 * Math.cos(phi);
-            camera.target.z = -500 * Math.sin(phi);
-            camera.position.y = this.y;
-            camera.fov = this.fov;
-            camera.updateProjectionMatrix();
-          })
-          .start()
-      }
-      animate() {
-        this.render();
-        requestAnimationFrame(() => {
-          this.animate()
-        });
-      }
-      render() {
-        TWEEN.update();
-        this.camera.lookAt(this.camera.target);
-        this.renderer.clear();
-        let timeend = new Date();
-        let timedis = timeend - this.timestart;
-        if (timedis > 3550) {
-          this.controls.update();
+    </style>
+  </head>
+
+  <body>
+    <div id="canvasposition"></div>
+    <canvas id="mycanvas" width="1730" height="910" class="FJMap"></canvas>
+    <script type="text/javascript">
+      var arr = [
+        // 福州
+        {
+          x: 1033,
+          y: 420,
+          radius: 8,
+          content: "区域1",
+          color: "red",
+        },
+        // 莆田
+        {
+          x: 979,
+          y: 600,
+          radius: 8,
+          content: "区域2",
+          color: "red",
+        },
+        // 厦门
+        {
+          x: 814,
+          y: 730,
+          radius: 8,
+          content: "区域3",
+          color: "red",
+        },
+      ];
+      var radius = arr[0].radius;
+      var mycanvas = document.getElementById("mycanvas");
+      var canvasposition = document.getElementById("canvasposition");
+      var ctx = mycanvas.getContext("2d");
+      var img = new Image();
+      img.src = "./img/putian.png";
+      var returnbutton = new Image();
+      returnbutton.src = "./img/return.png";
+
+      // 开始画图
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(returnbutton, 50, 20, 80, 40);
+        draw();
+      };
+      //判断点击,跳转
+      canvasposition.addEventListener(
+        "click",
+        function (e) {
+          p = getEventPosition(e);
+          // console.log(p)
+          //判断点击了那个矩形
+          if (
+            p.y >= arr[0].y - radius &&
+            p.y <= arr[0].y + radius &&
+            p.x >= arr[0].x - radius &&
+            p.x <= arr[0].x + radius
+          ) {
+            // console.log('福州', p)
+            window.location = "/putian1.html";
+          }
+          if (
+            p.y >= arr[1].y - radius &&
+            p.y <= arr[1].y + radius &&
+            p.x >= arr[1].x - radius &&
+            p.x <= arr[1].x + radius
+          ) {
+            // console.log('莆田', p)
+            window.location = "/putian1.html";
+          }
+          if (
+            p.y >= arr[2].y - radius &&
+            p.y <= arr[2].y + radius &&
+            p.x >= arr[2].x - radius &&
+            p.x <= arr[2].x + radius
+          ) {
+            // console.log('厦门', p)
+            window.location = "/putian1.html";
+          }
+          if (p.y >= 20 && p.y <= 60 && p.x >= 50 && p.x <= 130) {
+            window.location = "/index.html";
+          }
+        },
+        false
+      );
+      canvasposition.addEventListener(
+        "mousemove",
+        function (e) {
+          // console.log(e);
+          p = getEventPosition(e);
+          //判断点击了那个矩形
+          if (
+            p.y >= arr[0].y - radius &&
+            p.y <= arr[0].y + radius &&
+            p.x >= arr[0].x - radius &&
+            p.x <= arr[0].x + radius
+          ) {
+            this.style.cursor = "pointer";
+          } else if (
+            p.y >= arr[1].y - radius &&
+            p.y <= arr[1].y + radius &&
+            p.x >= arr[1].x - radius &&
+            p.x <= arr[1].x + radius
+          ) {
+            this.style.cursor = "pointer";
+          } else if (
+            p.y >= arr[2].y - radius &&
+            p.y <= arr[2].y + radius &&
+            p.x >= arr[2].x - radius &&
+            p.x <= arr[2].x + radius
+          ) {
+            this.style.cursor = "pointer";
+          } else if (p.y >= 20 && p.y <= 60 && p.x >= 50 && p.x <= 130) {
+            this.style.cursor = "pointer";
+          } else {
+            this.style.cursor = "default";
+          }
+        },
+        false
+      );
+      // //注：使用这个函数，需要给Canvas元素的position设为absolute。
+      //要判断事件对象发生的位置，事件对象e的layerX和layerY属性表示Canvas内部坐标系中的坐标
+      function getEventPosition(ev) {
+        var x, y;
+        if (ev.layerX || ev.layerX == 0) {
+          x = ev.layerX;
+          y = ev.layerY;
+        } else if (ev.offsetX || ev.offsetX == 0) {
+          // Opera
+          x = ev.offsetX;
+          y = ev.offsetY;
         }
-        this.renderer.render(this.scene, this.camera);
+        return {
+          x: x,
+          y: y,
+        };
       }
-    }
-    new panorama();
-    var returnbutton = document.getElementById('return')
-    returnbutton.addEventListener('click', function () {
-      window.location = './index.html'
-    })
-  </script>
-</body>
 
+      //画图像
+      function draw() {
+        // var who = [];
+        // ctx.clearRect(0, 0, mycanvas.width, mycanvas.height);
+        arr.forEach(function (v, i) {
+          ctx.beginPath();
+          ctx.arc(v.x, v.y, v.radius, 0, Math.PI * 2);
+          ctx.fillStyle = v.color;
+          ctx.fill();
+          // ctx.fillStyle = '#000';
+          ctx.font = "bold 20px Arial";
+          ctx.fillText(v.content, v.x - 20, v.y - 20);
+          ctx.stroke();
+        });
+      }
+    </script>
+  </body>
 </html>
